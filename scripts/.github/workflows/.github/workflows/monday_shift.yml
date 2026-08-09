@@ -1,0 +1,18 @@
+name: Shift Menu on Monday 00:00 KST
+on:
+  schedule:
+    - cron: '0 15 * * 0' # UTC 일요일 15:00 = KST 월요일 00:00
+  workflow_dispatch:
+jobs:
+  shift-sheet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - run: pip install -r requirements.txt
+      - run: python scripts/shift_menu.py
+        env:
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
