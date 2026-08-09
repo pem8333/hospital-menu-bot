@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'data/menu.jpg'
+  workflow_dispatch: # 이 한 줄을 추가하면 수동 실행 버튼이 생깁니다!
 jobs:
   update-sheet:
     runs-on: ubuntu-latest
