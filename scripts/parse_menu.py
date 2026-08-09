@@ -29,14 +29,27 @@ def update_google_sheet(menu_list):
     sheet.values().update(spreadsheetId=SPREADSHEET_ID, range='다음주!A2', valueInputOption='RAW', body={'values': menu_list}).execute()
 
 if __name__ == "__main__":
+    print("🚀 클로바 OCR 처리 시작...")
     ocr_result = run_clova_ocr()
     fields = ocr_result.get('images', [{}])[0].get('fields', [])
     
-    # TODO: Template OCR을 사용하는 경우 반환되는 key(날짜)에 맞춰 데이터 구성 (현재는 예시 구조)
-    # 아래는 임시 매핑이며, 실제 템플릿 필드명에 맞게 ['2026-08-10', 'A코너: ...'] 형태로 가공하셔야 합니다.
-    menu_data = [
-        ['2026-08-10', '월요일 메뉴 데이터 파싱 결과'], 
-        ['2026-08-11', '화요일 메뉴 데이터 파싱 결과']
-    ] 
-    update_google_sheet(menu_data)
-    print("✅ '다음주' 탭 식단 업데이트 완료")
+    if not fields:
+        print("⚠️ OCR에서 글자를 인식하지 못했습니다.")
+        # 빈 데이터라도 업데이트하여 에러 방지
+        update_google_sheet([['인식실패', '이미지를 다시 확인해주세요.']])
+    else:
+        # 1. OCR이 인식한 모든 글자 뽑아내기
+        extracted_texts = [f['inferText'] for f in fields]
+        full_text = " ".join(extracted_texts)
+        print("✅ 추출된 텍스트 일부:", full_text[:50])
+
+        # 2. 구글 시트에 저장할 형태로 만들기
+        # 챗봇이 '오늘 날짜'로 검색하기 때문에, 2월 이미지 테스트 중이더라도
+        # 날짜는 이번 주(8월 10일, 11일)로 강제로 맞춰서 테스트해 보겠습니다.
+        menu_data = [
+            ['2026-08-10', full_text],   # 월요일 날짜에 OCR 전체 결과 쑤셔넣기 테스트
+            ['2026-08-11', '화요일 정상작동 확인']
+        ] 
+        
+        update_google_sheet(menu_data)
+        print("✅ '다음주' 탭 식단 업데이트 완료")
