@@ -1,0 +1,20 @@
+name: Run OCR on Menu Upload
+on:
+  push:
+    paths:
+      - 'data/menu.jpg'
+jobs:
+  update-sheet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - run: pip install -r requirements.txt
+      - run: python scripts/parse_menu.py
+        env:
+          CLOVA_API_URL: ${{ secrets.CLOVA_API_URL }}
+          CLOVA_SECRET_KEY: ${{ secrets.CLOVA_SECRET_KEY }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
